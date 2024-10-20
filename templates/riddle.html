@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>{{status}}</p>
+
+Rätsel {{current}} von {{max}}
+
+<form action="/beenden" method="get"><input type="submit" value="Spiel abbrechen"></form>
+
+<h3>{{title}}</h3>
+
+<p>Adresse: {{address}}</p>
+
+<p>
+  <a href="static/img/riddle/{{map}}"><img src="static/img/riddle/{{map}}" alt="Karte" width="300"></a>
+</p>
+
+<p>
+  <a href="static/img/riddle/{{picture}}"><img src="static/img/riddle/{{picture}}" alt="Bild von Rätsel" width="300"></a>
+</p>
+
+<p>
+  {{content|safe}}
+</p>
+
+<form action="/checkAnswer" method="get">
+  <input type="hidden" name="id" value="{{id}}">
+  <input type="text" name="answer" autocomplete="off"><br>
+  <input type="submit" value="Abschicken">
+</form>
+
+<p>(Antwort: {{answer}})</p>
+
+{% endblock %}
