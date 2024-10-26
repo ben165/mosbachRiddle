@@ -4,26 +4,27 @@
 
 import random
 
-from flask import Flask, request, make_response, render_template
+from flask import Flask, request, make_response
 
 import db
-import gl #globals
+import gl # globals
+import h # html
 
 #FLASK INIT
 app = Flask(__name__)
 
 @app.route('/beenden')
 def beenden():
-  html= '''<p>Willst du das Spiel wirklich beenden?</p>
+  html = '''<p>Willst du das Spiel wirklich beenden?</p>
   <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>
   <form action="/play" method="get"><input type="submit" value="Spiel fortsetzen"></form>
   '''
-  return render_template('empty.html', content=html)
+  return h.head + html + h.tail
 
 @app.route('/logout')
 def logout():
-  html = render_template('empty.html', content='<p>Spiel wurde beendet.<br>Cookie mit Spielstand gelöscht.</p><form action="/" method="get"><input type="submit" value="Zur Startseite"></form>\n')
-  resp = make_response(html)
+  html = '<p>Spiel wurde beendet.<br>Cookie mit Spielstand gelöscht.</p><form action="/" method="get"><input type="submit" value="Zur Startseite"></form>\n'
+  resp = make_response(h.head + html + h.tail)
   resp.delete_cookie('game')
   return resp
 
@@ -37,7 +38,7 @@ def index():
     <form action="/beenden" method="get"><input type="submit" value="Spiel beenden"></form>
     '''
     
-    return render_template('empty.html', content=html)
+    return h.head + html + h.tail
 
 
   html = '''<p>Willkommen im Escape Room der Stadt Mosbach. Deine Aufgabe wird es sein, ein paar ausgewählte Rätsel zu lösen, um das Spiel zu beenden. Die Rätsel befinden sich alle nur wenige Gehminuten von dem Marktplatz entfernt. Zum Spielen taugt jedes Smartphone oder Tablet. Folge einfach den Hinweisen auf der Seite, besuche den Ort und sende die richtige Antwort ab.</p>
@@ -48,12 +49,8 @@ def index():
 
   <form action="/play" method="get"><input type="submit" value="Spiel starten"></form>
   '''
-   
-  return render_template('start.html',
-                         address='Marktplatz',
-                         map='00_marktplatz_karte.png',
-                         picture='00_marktplatz.jpg',
-                         content=html)
+  
+  return h.head + h.template_start("Marktplatz", "00_marktplatz_karte.png", "00_marktplatz.jpg", html) + h.tail
 
 
 @app.route('/play')
@@ -62,7 +59,8 @@ def play():
   
   if not(flag):
     # Starte neues Spiel
-    
+    print("Start new game")
+
     # Choose 5 riddles randomly of all riddles
     conn, c = db.connect()
     sql = "select id from riddle where active = 1"
@@ -84,16 +82,17 @@ def play():
     result = c.fetchone()
     db.close(conn)
 
-    html = render_template('riddle.html',
-                    id=result[0],
-                    title=result[1],
-                    address=result[2],
-                    map=result[3],
-                    picture=result[4],
-                    content=gl.render_riddle(result[5]),
-                    current=1,
-                    max=result[6],
-                    answer=result[7])
+    html = h.head + h.template_riddle(
+      result[0], #id
+      result[1], #title
+      result[2], #address
+      result[3], #map
+      result[4], #picture
+      result[5], #content
+      1, #current (new game)
+      result[6], #max
+      result[7] #answer
+    ) + h.tail
     
     resp = make_response(html)
     resp.set_cookie('game', cookie_content)
@@ -110,7 +109,7 @@ def play():
   try:
     pos = game[game[-1]-1]
   except:
-    return render_template('empty.html', content='Cookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>')
+    return h.head + 'Cookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>' + h.tail
 
   #print("POS: " + str(pos))
   #print("GAME: " + gl.game2str(game))
@@ -123,7 +122,7 @@ def play():
     html = []
     html.append('<p>Herzlichen Glückwunsch, du hast das Spiel erfolgreich beendet!</p>\n')
     html.append('<p>Der Gewinn-Code lautet: <b>'+result+'</b></p>\n<form action="/logout" method="get"><input type="submit" value="Spiel neustarten"></form>\n')
-    return render_template('empty.html', content=''.join(html))
+    return h.head + ''.join(html) + h.tail
 
   # Get actual riddle and render page
   sql = "select id, title, address, map, picture, text1, max, answer from riddle where id = %s"
@@ -132,18 +131,19 @@ def play():
   db.close(conn)
 
   if result == None:
-    return render_template('empty.html', content='Cookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>')
+    return h.head + '\nCookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>\n' + h.tail
 
-  html = render_template('riddle.html',
-                  id=result[0],
-                  title=result[1],
-                  address=result[2],
-                  map=result[3],
-                  picture=result[4],
-                  content=gl.render_riddle(result[5]),
-                  current=game[-1],
-                  max=result[6],
-                  answer=result[7])
+  html = h.head + h.template_riddle(
+    result[0], #id
+    result[1], #title
+    result[2], #address
+    result[3], #map
+    result[4], #picture
+    result[5], #content
+    game[-1], #current
+    result[6], #max
+    result[7] #answer
+  ) + h.tail
 
   #resp.set_cookie('game', cookie_content)
   resp = make_response(html)
@@ -158,7 +158,7 @@ def checkAnswer():
   
   answer = gl.filter_only_characters_and_nr(request.args.get('answer', ''))
   if len(answer) == 0:
-    return render_template('empty.html', content='<p>Keine Antwort eingegeben.</p><button onclick="history.back()">Zurück</button>')
+    return h.head + '<p>Keine Antwort eingegeben.</p><button onclick="history.back()">Zurück</button>' + h.tail
 
   conn, c = db.connect()
   sql = "select answer from riddle where id = %s"
@@ -170,50 +170,22 @@ def checkAnswer():
     flag, game = gl.read_cookie(request)
 
     if not(flag):
-      return render_template('empty.html', content='Cookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>')
+      return h.head + 'Cookie korrput. Beginne neues Spiel. <form action="/logout" method="get"><input type="submit" value="Spiel beenden"></form>' + h.tail
 
     game[-1] += 1
     
-    html = render_template('empty.html', content='<p>Die Eingabe <b>'+ answer +'</b> ist korrekt!</p><form action="/play" method="get"><input type="submit" value="Spiel fortsetzen"></form>')
+    html = h.head + '<p>Die Eingabe <b>'+ answer +'</b> ist korrekt!</p><form action="/play" method="get"><input type="submit" value="Spiel fortsetzen"></form>' + h.tail
     resp = make_response(html)
     resp.set_cookie('game', gl.number_to_cookie(game)[1])
     return resp
   else:
-    return render_template('empty.html', content='<p>Die Antwort <b>'+ answer +'</b> ist leider nicht korrekt.</p><button onclick="history.back()">Zurück</button>')
-
-@app.route('/showDB')
-def showDB():
-  conn, c = db.connect()
-
-  sql = "select * from mc"
-  c.execute(sql)
-  result = c.fetchall()
-
-  db.close(conn)
-
-  return "Table deleted and created."
+    return h.head + '<p>Die Antwort <b>'+ answer +'</b> ist leider nicht korrekt.</p><button onclick="history.back()">Zurück</button>' + h.tail
 
 
 @app.route('/admin')
 def admin():
   pass
 
-
-
-
-@app.route('/checkDB')
-def checkDB():
-  html = []
- 
-  conn, c = db.connect()
-  html.append("c: ")
-  html.append(str(gl.filter_only_characters_and_nr(str(c))))
-  html.append("<br />\nconn: ")
-  html.append(str(gl.filter_only_characters_and_nr(str(conn))))
- 
-  db.close(conn)
- 
-  return "".join(html)
 
 @app.route('/create')
 def create():

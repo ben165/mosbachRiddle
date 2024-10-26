@@ -70,10 +70,6 @@ def filter_bad_sql(str1):
       str2.append(i)
   return "".join(str2)
 
-def render_riddle(str1):
-  str1 = str1.replace("\n", "<br>\n")
-  return str1
-
 def cookie_to_number(str1):
   list1 = []
   for i in str1:

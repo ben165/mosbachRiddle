@@ -1,10 +1,7 @@
 import mysql.connector
 
 def connect():
-  #Mysql Connector
-  host='mosbachRiddle.mysql.pythonanywhere-services.com'
-  conn = mysql.connector.connect(user='', password='', host=host, database='$default')
-
+  conn = mysql.connector.connect(user='', password='', host='localhost', database='riddle')
   c = conn.cursor()
   return [conn, c]
 
