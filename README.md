@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 ## Lokale Ausführung
 
-Es eine eine MySQL oder MariaDB Datenbank nötig, mit die App kommunizieren kann. Der Name der Datenbank (im unteren Beispiel `riddle`) muss händisch angelegt werden. Danach die Login Information in der Datei `db.py` in Zeile 4 anpassen. Als Beispiel kann das so aussehen:
+Es eine eine MySQL oder MariaDB Datenbank nötig, mit der die Web-Applikation kommunizieren kann. Der Name der Datenbank (im unteren Beispiel `riddle`) muss händisch angelegt werden. Danach die Login Information in der Datei `db.py` in Zeile 4 anpassen. Als Beispiel kann das so aussehen:
 
 ```
 conn = mysql.connector.connect(user='user1', password='user1', host='localhost', database='riddle')
@@ -51,7 +51,7 @@ Der lokale Server wird gestartet
 Running on http://127.0.0.1:5000
 ```
 
-Um die ersten Rätsel in die Datenbank schreiben, folgende Route aufrufen (TODO: Diese Route mit PW versehen. In der Online Version auf Pythonanywhere ist diese entfernt):
+Um die ersten Rätsel in die Datenbank schreiben, folgende Route aufrufen (TODO: Diese Route danach entfernen. In der Online Version auf Pythonanywhere ist diese entfernt bzw. umbenannt):
 
 ```
 http://127.0.0.1:5000/create
