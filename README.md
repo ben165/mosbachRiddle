@@ -54,7 +54,7 @@ Running on http://127.0.0.1:5000
 Um die ersten Rätsel in die Datenbank schreiben, folgende Route aufrufen (TODO: Diese Route danach entfernen. In der Online Version auf Pythonanywhere ist diese entfernt bzw. umbenannt):
 
 ```
-http://127.0.0.1:5000/create
+http://127.0.0.1:5000/reset
 ```
 
 Wenn alles geklappt hat, bekommt man als Response

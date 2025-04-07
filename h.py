@@ -1,3 +1,4 @@
+import time
 head = '''<!DOCTYPE html>
 <html lang="de">
 
@@ -5,7 +6,7 @@ head = '''<!DOCTYPE html>
 <title>Riddle</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="static/sakura.css" type="text/css">
+<link rel="stylesheet" href="/static/sakura.css" type="text/css">
 </head>
 <body>
 
@@ -33,15 +34,30 @@ def template_start(address, map, picture, content):
   return ''.join(lst1)
 
 
-def template_riddle(id, title, address, map, picture, content, current, max, answer):
+def template_riddle(id, title, address, map, picture, content, current, max, answer, ts, delay):
+  ts_current = int( time.time() )
+  diff_time = ts_current - int(ts)
   lst1 = []
   # Optional
   # lst1.append('<p>'+status+'</p>')
-  lst1.append('<p></p>\n')
-  lst1.append('Rätsel '+str(current)+' von ' +str(max))
+  
+  #lst1.append('<p></p>\n')
+
+  lst1.append('Rätsel '+str(current+1)+' von ' +str(max))
   lst1.append('<form action="/beenden" method="get"><input type="submit" value="Spiel abbrechen"></form>\n')
-  lst1.append('<h3>'+title+'</h3>\n')
-  lst1.append(template_start(address, map, picture, content))
+  
+  if diff_time >= delay:
+    lst1.append('<h3>'+title+'</h3>\n')
+    lst1.append('<p>Adresse: '+address+'</p>\n')
+    lst1.append('<p><a href="static/img/riddle/'+map+'"><img src="static/img/riddle/'+map+'" alt="Karte" width="300"></a></p>\n')
+  else:
+    lst1.append("<script>ts = "+ str(ts) +"; max = "+ str(delay) +"</script>")
+    lst1.append("<script src=\"/static/counter.js\"></script>")
+    lst1.append('<p id="timer"></p>\n')
+
+  lst1.append('<h4>Bild</h4>\n')
+  lst1.append('<p><a href="static/img/riddle/'+picture+'"><img src="static/img/riddle/'+picture+'" alt="Bild von Rätsel" width="300"></a></p>\n')
+  lst1.append(content + "\n")
 
   lst1.append('<form action="/checkAnswer" method="get">\n')
   lst1.append('<input type="hidden" name="id" value="'+str(id)+'">\n')
