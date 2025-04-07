@@ -65,7 +65,7 @@ def template_riddle(id, title, address, map, picture, content, current, max, ans
   lst1.append('<input type="submit" value="Abschicken">\n')
   lst1.append('</form>\n\n')
 
-  lst1.append('<p>(Antwort: '+answer+')</p>\n')
+  #lst1.append('<p>(Antwort: '+answer+')</p>\n')
 
   return ''.join(lst1)
 
