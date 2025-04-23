@@ -323,6 +323,29 @@ def deactivateRiddle():
     db.close(conn)
     return h.head + "Session does not match. Back to <a href=\"/admin\">Login</a>." + h.tail
   
+  # De-activate riddle if choosen
+  id = request.args.get('id', '')
+  if len(id) != 0:
+    id = gl.filter_only_numbers(id)
+    if ( len(id) != 0):
+      sql = "select active from riddle where id = %s"
+      c.execute(sql, [id])
+      try:
+        r = c.fetchone()[0]
+        if (r == 0):
+          r = 1
+        else:
+          r = 0
+        sql = "update riddle set active = %s where id = %s"
+        c.execute(sql, [r, id])
+        conn.commit()
+      except:
+        db.close(conn)
+        return "Riddle ID not found."
+    else:
+      db.close(conn)
+      return "ID is not a correct number."
+
   sql = "select id, title, active from riddle"
   c.execute(sql)
   result = c.fetchall()
@@ -333,37 +356,11 @@ def deactivateRiddle():
   html.append("<table>\n")
   html.append("<tr><th>ID</th><th>Titel</th><th>Status</th></tr>\n")
   for i in result:
-    html.append("<tr><td><a href=\"doDeactivateRiddle/"+ str(i[0]) +"\">"+ str(i[0]) +"</a></td><td>"+ i[1] +"</td><td>"+ status[i[2]] +"</td></tr>\n")
+    html.append("<tr><td><a href=\"deactivateRiddle?id="+ str(i[0]) +"\">"+ str(i[0]) +"</a></td><td>"+ i[1] +"</td><td>"+ status[i[2]] +"</td></tr>\n")
   html.append("</table>")    
 
   db.close(conn)
   return h.head + ''.join(html) + h.tail
-
-@app.route('/doDeactivateRiddle/<id>')
-def doDeactivateRiddle(id):
-  nr = gl.filter_only_numbers(id)
-  if len(nr) == 0:
-    return "ID wrong."
-  
-  #Check session
-  conn, c = db.connect()
-  if not(gl.checkSession(request, c)):
-    db.close(conn)
-    return h.head + "Session does not match. Back to <a href=\"/admin\">Login</a>." + h.tail
-
-  sql = "select active from riddle where id = %s"
-  c.execute(sql, [nr])
-  r = c.fetchone()[0]
-  if (r == 0):
-    r = 1
-  else:
-    r = 0
-  sql = "update riddle set active = %s where id = %s"
-  c.execute(sql, [r, nr])
-  conn.commit()
-  db.close(conn)
-
-  return h.head + "Riddle activation switched. Back to <a href=\"/deactivateRiddle\">Riddle Status</a>." + h.tail
 
 @app.route('/adminDeleteRiddle/<id>')
 def adminDeleteRiddle(id):
